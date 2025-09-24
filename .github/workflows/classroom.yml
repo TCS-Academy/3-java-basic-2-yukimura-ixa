@@ -1,0 +1,32 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    env:
+      JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF-8"
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: GradleJava
+      id: gradlejava
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: GradleJava
+        setup-command: ''
+        command: gradle test
+        timeout: 10
+        max-score: 10
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        GRADLEJAVA_RESULTS: "${{steps.gradlejava.outputs.result}}"
+      with:
+        runners: gradlejava
